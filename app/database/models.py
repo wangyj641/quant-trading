@@ -1,7 +1,11 @@
-from sqlalchemy import Column
-from sqlalchemy import Float
-from sqlalchemy import Integer
-from sqlalchemy import String
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    DateTime,
+    Index,
+)
 
 from sqlalchemy.orm import declarative_base
 
@@ -14,9 +18,11 @@ class Price(Base):
 
     id = Column(Integer, primary_key=True)
 
-    symbol = Column(String)
+    symbol = Column(String(20), nullable=False)
 
-    date = Column(String)
+    datetime = Column(DateTime, nullable=False)
+
+    interval = Column(String(10), nullable=False)
 
     open = Column(Float)
 
@@ -27,3 +33,13 @@ class Price(Base):
     close = Column(Float)
 
     volume = Column(Float)
+
+    __table_args__ = (
+        Index(
+            "idx_symbol_datetime_interval",
+            "symbol",
+            "datetime",
+            "interval",
+            unique=True,
+        ),
+    )

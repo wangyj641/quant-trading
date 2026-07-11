@@ -4,14 +4,16 @@ from app.database.models import Price
 
 class PriceRepository:
 
-    def save(self, records):
+    def __init__(self):
 
-        session = SessionLocal()
+        self.session = SessionLocal()
 
-        for row in records:
+    def save_all(self, prices):
 
-            session.add(row)
+        self.session.add_all(prices)
 
-        session.commit()
+        self.session.commit()
 
-        session.close()
+    def close(self):
+
+        self.session.close()
