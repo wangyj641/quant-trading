@@ -17,3 +17,39 @@ class PriceRepository:
     def close(self):
 
         self.session.close()
+
+
+
+
+    def get_latest_datetime(
+        self,
+        symbol,
+        interval,
+        ):
+
+        stmt = (
+            select(func.max(Price.datetime))
+            .where(
+                Price.symbol == symbol,
+                Price.interval == interval,
+            )
+        )
+
+        return self.session.scalar(stmt)
+    
+
+    def count(
+        self,
+        symbol,
+        interval,
+        ):
+
+        stmt = (
+            select(func.count())
+            .where(
+                Price.symbol == symbol,
+                Price.interval == interval,
+            )
+        )
+
+        return self.session.scalar(stmt)
