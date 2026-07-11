@@ -40,6 +40,6 @@ class MarketDataService:
             interval,
         )
 
-        # self.repository.save_all(prices)
+        self.repository.save_all(prices)
 
         print(f"{symbol}: saved {len(prices)} rows")

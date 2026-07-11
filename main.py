@@ -8,12 +8,24 @@ from app.services.market_data_service import MarketDataService
 from app.database.models import Base
 from app.database.db import engine
 
+from pathlib import Path
+
+
+def dellete_db():
+
+    db = Path("data/market.db")
+
+    if db.exists():
+        db.unlink()
+
 
 def main():
     print("Hello from quant-trading!")
 
     print("Data:", DATA_DIR)
     print("Logs:", LOG_DIR)
+
+    dellete_db()
 
     Base.metadata.create_all(engine)
 
