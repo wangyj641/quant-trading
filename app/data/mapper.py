@@ -1,4 +1,6 @@
 from app.database.models import Price
+from app.domain.market_bar import MarketBar
+
 
 class PriceMapper:
 
@@ -9,12 +11,11 @@ class PriceMapper:
         interval,
     ):
 
-        prices = []
+        bars = []
 
         for index, row in df.iterrows():
-            prices.append(
-
-                Price(
+            bars.append(
+                MarketBar(
                     symbol=symbol,
                     datetime=index.to_pydatetime(),
                     interval=interval,
@@ -25,5 +26,4 @@ class PriceMapper:
                     volume=float(row["Volume"]),
                 )
             )
-
-        return prices
+        return bars

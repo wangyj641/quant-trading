@@ -34,12 +34,12 @@ class MarketDataService:
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
-        prices = PriceMapper.from_dataframe(
+        bars = PriceMapper.from_dataframe(
             df,
             symbol,
             interval,
         )
 
-        self.repository.save_all(prices)
+        self.repository.save_all(bars)
 
-        print(f"{symbol}: saved {len(prices)} rows")
+        print(f"{symbol}: saved {len(bars)} rows")
