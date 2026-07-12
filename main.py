@@ -4,9 +4,11 @@ from app.data.provider_factory import create_provider
 
 from app.database.repository import PriceRepository
 from app.services.market_data_service import MarketDataService
+from app.domain.timeframe import TimeFrame
 
 from app.database.models import Base
 from app.database.db import engine
+
 
 from pathlib import Path
 
@@ -40,6 +42,13 @@ def main():
     )
 
     service.sync_symbol("MU")
+
+    bars = repo.get_history(
+        symbol="MU",
+        timeFrame=TimeFrame("1d"),
+    )
+
+    print(type(bars[0]))
 
     repo.close()
 

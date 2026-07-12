@@ -1,4 +1,5 @@
 from app.database.models import Price
+from app.domain.market_bar import MarketBar
 
 
 class ORMMapper:
@@ -15,4 +16,18 @@ class ORMMapper:
             low=bar.low,
             close=bar.close,
             volume=bar.volume,
+        )
+
+    @staticmethod
+    def to_market_bar(price: Price):
+
+        return MarketBar(
+            symbol=price.symbol,
+            datetime=price.datetime,
+            interval=price.interval,
+            open=price.open,
+            high=price.high,
+            low=price.low,
+            close=price.close,
+            volume=price.volume,
         )

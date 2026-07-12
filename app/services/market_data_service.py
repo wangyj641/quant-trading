@@ -29,7 +29,7 @@ class MarketDataService:
             interval,
         )
 
-        print(df.columns)
+        # print(df.columns)
 
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
