@@ -1,6 +1,4 @@
-import pandas as pd
-
-from app.indicators.base_indicator import Indicator
+# import pandas as pd
 
 
 class IndicatorEngine:
@@ -9,20 +7,16 @@ class IndicatorEngine:
 
         self.indicators = []
 
-    def register(
-        self,
-        indicator: Indicator,
-    ):
+    def register(self, indicator):
 
         self.indicators.append(indicator)
 
-    def calculate(
-        self,
-        df: pd.DataFrame,
-    ) -> pd.DataFrame:
+    def calculate(self, df):
+
+        result = df.copy()
 
         for indicator in self.indicators:
 
-            df = indicator.calculate(df)
+            result[indicator.column_name] = indicator.calculate(result)
 
-        return df
+        return result

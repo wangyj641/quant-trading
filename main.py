@@ -9,6 +9,10 @@ from app.domain.timeframe import TimeFrame
 from app.database.models import Base
 from app.database.db import engine
 
+from app.indicators.indicator_engine import IndicatorEngine
+
+from app.indicators.ma_indicator import MAIndicator
+
 
 from pathlib import Path
 
@@ -19,6 +23,19 @@ def dellete_db():
 
     if db.exists():
         db.unlink()
+
+
+def test_indicators():
+
+    engine = IndicatorEngine()
+
+    engine.register(MAIndicator(5))
+    engine.register(MAIndicator(20))
+    engine.register(MAIndicator(60))
+
+    df = engine.calculate(df)
+
+    print(df.columns)
 
 
 def main():
@@ -49,6 +66,8 @@ def main():
     )
 
     print(type(bars[0]))
+
+    # test_indicators()
 
     repo.close()
 

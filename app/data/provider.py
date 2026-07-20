@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 import pandas as pd
 
 
@@ -14,6 +15,3 @@ class MarketDataProvider(ABC):
     ) -> pd.DataFrame:
         """下载历史行情"""
         pass
-
-
-    

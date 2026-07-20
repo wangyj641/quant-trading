@@ -11,11 +11,11 @@ class MAIndicator(Indicator):
     ):
         self.period = period
 
-    def calculate(
-        self,
-        df: pd.DataFrame,
-    ) -> pd.DataFrame:
+    def calculate(self, df):
 
-        df[f"MA{self.period}"] = df["close"].rolling(self.period).mean()
+        return df["close"].rolling(self.period).mean()
 
-        return df
+    @property
+    def column_name(self):
+
+        return f"MA{self.period}"
