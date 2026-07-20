@@ -13,6 +13,9 @@ from app.indicators.indicator_engine import IndicatorEngine
 
 from app.indicators.ma_indicator import MAIndicator
 
+from app.converters.dataframe_converter import DataFrameConverter
+from app.strategy.ma_cross_strategy import MACrossStrategy
+
 
 from pathlib import Path
 
@@ -25,17 +28,27 @@ def dellete_db():
         db.unlink()
 
 
-def test_indicators():
+def test_strategy(repo):
+    bars = repo.get_history(
+        symbol="MU",
+        timeFrame=TimeFrame.DAY_1,
+        limit=300,
+    )
+
+    df = DataFrameConverter.bars_to_dataframe(bars)
 
     engine = IndicatorEngine()
 
     engine.register(MAIndicator(5))
     engine.register(MAIndicator(20))
-    engine.register(MAIndicator(60))
 
     df = engine.calculate(df)
 
-    print(df.columns)
+    strategy = MACrossStrategy()
+
+    result = strategy.run(df)
+
+    print(result.tail(20))
 
 
 def main():
@@ -60,14 +73,7 @@ def main():
 
     service.sync_symbol("MU")
 
-    bars = repo.get_history(
-        symbol="MU",
-        timeFrame=TimeFrame("1d"),
-    )
-
-    print(type(bars[0]))
-
-    # test_indicators()
+    test_strategy(repo)
 
     repo.close()
 

@@ -7,7 +7,7 @@ import pandas as pd
 class Strategy(ABC):
 
     @abstractmethod
-    def generate_signal(
+    def run(
         self,
         df: pd.DataFrame,
     ) -> pd.DataFrame: ...
