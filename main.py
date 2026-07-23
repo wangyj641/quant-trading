@@ -35,6 +35,7 @@ def test_strategy(repo):
     bars = repo.get_history(
         symbol="MU",
         timeFrame=TimeFrame.DAY_1,
+        limit=1000,
     )
 
     df = DataFrameConverter.bars_to_dataframe(bars)
@@ -53,6 +54,15 @@ def test_strategy(repo):
     backtest = BacktestEngine()
 
     report = backtest.run(df)
+
+    for trade in report.trades:
+        print(
+            f"{trade.entry_time.date()} "
+            f"BUY @{trade.entry_price:.2f} -> "
+            f"{trade.exit_time.date()} "
+            f"SELL @{trade.exit_price:.2f} "
+            f"Profit: {trade.profit:.2f}"
+        )
 
     print(report)
 
