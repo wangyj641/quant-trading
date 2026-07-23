@@ -15,6 +15,9 @@ from app.indicators.ma_indicator import MAIndicator
 
 from app.converters.dataframe_converter import DataFrameConverter
 from app.strategy.ma_cross_strategy import MACrossStrategy
+from app.backtest.engine import BacktestEngine
+
+# from app.backtest.report import BacktestReport
 
 
 from pathlib import Path
@@ -32,7 +35,6 @@ def test_strategy(repo):
     bars = repo.get_history(
         symbol="MU",
         timeFrame=TimeFrame.DAY_1,
-        limit=300,
     )
 
     df = DataFrameConverter.bars_to_dataframe(bars)
@@ -46,9 +48,13 @@ def test_strategy(repo):
 
     strategy = MACrossStrategy()
 
-    result = strategy.run(df)
+    df = strategy.run(df)
 
-    print(result.tail(20))
+    backtest = BacktestEngine()
+
+    report = backtest.run(df)
+
+    print(report)
 
 
 def main():
