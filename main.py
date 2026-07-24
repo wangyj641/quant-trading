@@ -21,7 +21,7 @@ from app.backtest.engine import BacktestEngine
 
 from app.backtest.plot import plot_equity_curve
 from app.backtest.report_formatter import ReportFormatter
-
+from app.visualization.chart import Chart
 
 from pathlib import Path
 
@@ -58,7 +58,9 @@ def test_strategy(repo):
 
     report = backtest.run(df)
 
-    plot_equity_curve(report)
+    # plot_equity_curve(report)
+
+    Chart.plot_price(df)
 
     for trade in report.trades:
         print(
