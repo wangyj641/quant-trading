@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from app.backtest.trade import Trade
+from pandas import Series
 
 
 @dataclass(slots=True)
