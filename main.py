@@ -20,6 +20,7 @@ from app.backtest.engine import BacktestEngine
 # from app.backtest.report import BacktestReport
 
 from app.backtest.plot import plot_equity_curve
+from app.backtest.report_formatter import ReportFormatter
 
 
 from pathlib import Path
@@ -68,7 +69,7 @@ def test_strategy(repo):
             f"Profit: {trade.profit:.2f}"
         )
 
-    print(report)
+    ReportFormatter.print(report)
 
 
 def main():
@@ -84,12 +85,10 @@ def main():
     provider = create_provider()
 
     downloader = Downloader(provider)
+
     repo = PriceRepository()
 
-    service = MarketDataService(
-        downloader,
-        repo,
-    )
+    service = MarketDataService(downloader, repo)
 
     service.sync_symbol("MU")
 

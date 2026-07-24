@@ -18,6 +18,8 @@ class BacktestReport:
 
     win_rate: float
 
+    max_drawdown: float
+
     trades: list[Trade]
 
     # 新增：每日账户价值

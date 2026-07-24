@@ -3,6 +3,7 @@ import pandas as pd
 from app.backtest.report import BacktestReport
 from app.backtest.trade import Trade
 from app.domain.signal import Signal
+from app.backtest.metrics import Metrics
 
 
 class BacktestEngine:
@@ -98,12 +99,15 @@ class BacktestEngine:
 
         equity_series = equity_df.set_index("datetime")["value"]
 
+        max_drawdown = Metrics.max_drawdown(equity_series)
+
         return BacktestReport(
             initial_cash=self.initial_cash,
             final_cash=cash,
             total_return=total_return,
             trade_count=trade_count,
             win_rate=win_rate,
+            max_drawdown=max_drawdown,
             trades=trades,
             equity_curve=equity_series,
         )

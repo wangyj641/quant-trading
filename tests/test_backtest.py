@@ -2,6 +2,7 @@ import pandas as pd
 
 from app.backtest.engine import BacktestEngine
 from app.domain.signal import Signal
+from app.backtest.metrics import Metrics
 
 
 def test_backtest():
@@ -40,3 +41,21 @@ def test_equity_curve():
     report = engine.run(df)
 
     assert len(report.equity_curve) == 3
+
+
+def test_max_drawdown():
+
+    equity = pd.Series(
+        [
+            100,
+            120,
+            110,
+            90,
+            95,
+            130,
+        ]
+    )
+
+    mdd = Metrics.max_drawdown(equity)
+
+    assert round(mdd, 2) == -0.25
