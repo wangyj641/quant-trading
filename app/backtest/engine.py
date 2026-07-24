@@ -20,10 +20,16 @@ class BacktestEngine:
 
         trades = []
 
+        equity_curve = []
+
         for index, row in df.iterrows():
 
             signal = row["signal"]
             price = row["close"]
+
+            portfolio_value = cash + shares * price
+
+            equity_curve.append({"datetime": index, "value": portfolio_value})
 
             # BUY
             if signal == Signal.BUY.value and shares == 0:
@@ -88,6 +94,10 @@ class BacktestEngine:
 
         total_return = (cash - self.initial_cash) / self.initial_cash
 
+        equity_df = pd.DataFrame(equity_curve)
+
+        equity_series = equity_df.set_index("datetime")["value"]
+
         return BacktestReport(
             initial_cash=self.initial_cash,
             final_cash=cash,
@@ -95,4 +105,5 @@ class BacktestEngine:
             trade_count=trade_count,
             win_rate=win_rate,
             trades=trades,
+            equity_curve=equity_series,
         )
