@@ -1,7 +1,7 @@
-from enum import IntEnum
+from enum import StrEnum
 
 
-class Signal(IntEnum):
-    HOLD = 0
-    BUY = 1
-    SELL = -1
+class SignalType(StrEnum):
+    BUY = "BUY"
+    SELL = "SELL"
+    HOLD = "HOLD"

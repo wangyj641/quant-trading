@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 class Chart:
 
     @staticmethod
-    def plot_price(df):
+    def plot_price(df, signals):
 
         plt.figure(figsize=(16, 8))
 

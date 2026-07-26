@@ -22,6 +22,7 @@ from app.backtest.engine import BacktestEngine
 from app.backtest.plot import plot_equity_curve
 from app.backtest.report_formatter import ReportFormatter
 from app.visualization.chart import Chart
+from app.execution.backtest_execution import BacktestExecution
 
 from pathlib import Path
 
@@ -52,26 +53,19 @@ def test_strategy(repo):
 
     strategy = MACrossStrategy()
 
-    df = strategy.run(df)
+    signals = strategy.generate("MU", df)
 
-    backtest = BacktestEngine()
+    execution_engine = BacktestExecution(initial_cash=100000)
 
-    report = backtest.run(df)
+    backtest = BacktestEngine(execution_engine)
+
+    result = backtest.run(df, signals)
 
     # plot_equity_curve(report)
 
-    Chart.plot_price(df)
+    # Chart.plot_price(df, signals)
 
-    for trade in report.trades:
-        print(
-            f"{trade.entry_time.date()} "
-            f"BUY @{trade.entry_price:.2f} -> "
-            f"{trade.exit_time.date()} "
-            f"SELL @{trade.exit_price:.2f} "
-            f"Profit: {trade.profit:.2f}"
-        )
-
-    ReportFormatter.print(report)
+    # ReportFormatter.print(report)
 
 
 def main():

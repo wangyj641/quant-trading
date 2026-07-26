@@ -1,30 +1,43 @@
 import pandas as pd
 
-from app.domain.signal import Signal
+from app.domain.signal import SignalType
 from app.strategy.base_strategy import Strategy
+
+from app.domain.trading_signal import TradingSignal
+from app.domain.trading_signal import SignalType
 
 
 class MACrossStrategy(Strategy):
 
-    def run(
+    def generate(
         self,
+        symbol: str,
         df: pd.DataFrame,
-    ) -> pd.DataFrame:
+    ) -> list[TradingSignal]:
 
-        result = df.copy()
+        signals = []
 
-        result["signal"] = Signal.HOLD.value
+        for i in range(1, len(df)):
 
-        buy = (result["MA5"] > result["MA20"]) & (
-            result["MA5"].shift(1) <= result["MA20"].shift(1)
-        )
+            prev = df.iloc[i - 1]
+            curr = df.iloc[i]
 
-        sell = (result["MA5"] < result["MA20"]) & (
-            result["MA5"].shift(1) >= result["MA20"].shift(1)
-        )
+            if prev["MA5"] <= prev["MA20"] and curr["MA5"] > curr["MA20"]:
+                signals.append(
+                    TradingSignal(
+                        symbol=symbol,
+                        datetime=df.index[i],
+                        signal=SignalType.BUY,
+                    )
+                )
 
-        result.loc[buy, "signal"] = Signal.BUY.value
+            elif prev["MA5"] >= prev["MA20"] and curr["MA5"] < curr["MA20"]:
+                signals.append(
+                    TradingSignal(
+                        symbol=symbol,
+                        datetime=df.index[i],
+                        signal=SignalType.SELL,
+                    )
+                )
 
-        result.loc[sell, "signal"] = Signal.SELL.value
-
-        return result
+        return signals

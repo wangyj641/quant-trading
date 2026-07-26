@@ -1,12 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 
-from app.domain.signal import Signal
+
+class SignalType(Enum):
+    BUY = "BUY"
+    SELL = "SELL"
 
 
 @dataclass(slots=True)
 class TradingSignal:
     symbol: str
     datetime: datetime
-    signal: Signal
-    price: float
+    signal: SignalType
