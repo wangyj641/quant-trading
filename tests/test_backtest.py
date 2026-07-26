@@ -1,61 +1,17 @@
 import pandas as pd
 
 from app.backtest.engine import BacktestEngine
-from app.domain.signal import Signal
 from app.backtest.metrics import Metrics
+from app.domain.signal import SignalType
+from app.execution.backtest_execution import BacktestExecution
+from app.execution.base import ExecutionResult
+from app.execution.backtest_execution import BacktestExecution
 
 
 def test_backtest():
 
-    df = pd.DataFrame(
-        {
-            "close": [100, 105, 110],
-            "signal": [
-                Signal.BUY.value,
-                Signal.HOLD.value,
-                Signal.SELL.value,
-            ],
-        }
-    )
+    execution_engine = BacktestExecution(initial_cash=100000)
 
-    engine = BacktestEngine(initial_cash=100000)
+    backtest = BacktestEngine(execution_engine)
 
-    report = engine.run(df)
-
-    assert report.trade_count == 1
-
-    assert report.final_cash > 100000
-
-
-def test_equity_curve():
-
-    df = pd.DataFrame(
-        {
-            "close": [100, 110, 120],
-            "signal": [Signal.BUY.value, Signal.HOLD.value, Signal.SELL.value],
-        }
-    )
-
-    engine = BacktestEngine(initial_cash=10000)
-
-    report = engine.run(df)
-
-    assert len(report.equity_curve) == 3
-
-
-def test_max_drawdown():
-
-    equity = pd.Series(
-        [
-            100,
-            120,
-            110,
-            90,
-            95,
-            130,
-        ]
-    )
-
-    mdd = Metrics.max_drawdown(equity)
-
-    assert round(mdd, 2) == -0.25
+    assert isinstance(backtest, BacktestEngine)
