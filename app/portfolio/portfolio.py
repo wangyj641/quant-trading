@@ -76,3 +76,7 @@ class Portfolio:
     ) -> Position | None:
 
         return self.positions.get(symbol)
+
+    @property
+    def invested_value(self):
+        return sum(position.cost for position in self.positions.values())
