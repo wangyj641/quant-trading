@@ -1,4 +1,5 @@
 # import pandas as pd
+from app.indicators.ma_indicator import MAIndicator
 
 
 class IndicatorEngine:
@@ -9,6 +10,11 @@ class IndicatorEngine:
 
     def register(self, indicator):
 
+        self.indicators.append(indicator)
+
+    def add_ma(self, df, period):
+
+        indicator = MAIndicator(period)
         self.indicators.append(indicator)
 
     def calculate(self, df):

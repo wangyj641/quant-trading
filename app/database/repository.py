@@ -57,7 +57,7 @@ class PriceRepository:
     def get_history(
         self,
         symbol,
-        timeFrame: TimeFrame,
+        timeFrame=TimeFrame.DAY_1,
         limit: int | None = None,
     ) -> list[MarketBar]:
 

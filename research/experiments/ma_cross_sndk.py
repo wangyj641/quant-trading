@@ -22,8 +22,8 @@ def main():
 
     engine = IndicatorEngine()
 
-    engine.register(MAIndicator(5))
-    engine.register(MAIndicator(20))
+    engine.add_ma(df, 5)
+    engine.add_ma(df, 20)
 
     df = engine.calculate(df)
 
