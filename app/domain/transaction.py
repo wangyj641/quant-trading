@@ -10,15 +10,13 @@ class TransactionSide(StrEnum):
 
 @dataclass(slots=True)
 class Transaction:
-
     symbol: str
-
     datetime: datetime
-
     side: TransactionSide
-
     quantity: int
-
     price: float
-
     commission: float = 0.0
+
+    @property
+    def value(self) -> float:
+        return self.quantity * self.price

@@ -4,6 +4,8 @@ from app.domain.position import Position
 from app.domain.trade import Trade
 from app.domain.transaction import Transaction
 from app.portfolio.snapshot import PortfolioSnapshot
+from datetime import datetime
+from app.domain.transaction import TransactionSide
 
 
 class Portfolio:
@@ -29,21 +31,12 @@ class Portfolio:
     def total_positions(self) -> int:
         return len(self.positions)
 
-    def buy(
+    def _add_position(
         self,
         symbol: str,
-        price: float,
         quantity: int,
-        datetime: int,
+        price: float,
     ):
-
-        cost = price * quantity
-
-        if cost > self.cash:
-            raise ValueError("Insufficient cash")
-
-        self.cash -= cost
-
         position = self.positions.get(symbol)
 
         if position is None:
@@ -52,58 +45,153 @@ class Portfolio:
                 symbol=symbol,
                 quantity=quantity,
                 average_price=price,
+                entry_time=datetime.now(),
             )
 
-            position = self.positions.get(symbol)
+            return
 
-        else:
+        old_quantity = position.quantity
 
-            total_cost = position.average_price * position.quantity + cost
+        old_cost = old_quantity * position.average_price
 
-            total_quantity = position.quantity + quantity
+        new_cost = quantity * price
 
-            position.average_price = total_cost / total_quantity
+        total_quantity = old_quantity + quantity
 
-            position.quantity = total_quantity
+        position.average_price = (old_cost + new_cost) / total_quantity
 
-        return position
+        position.quantity = total_quantity
+
+    def _remove_position(
+        self,
+        symbol: str,
+        quantity: int,
+        price: float,
+        datetime: datetime,
+    ):
+        position = self.positions[symbol]
+
+        if quantity < position.quantity:
+
+            position.quantity -= quantity
+
+            return
+
+        self._close_position(
+            position=position,
+            exit_price=price,
+            exit_time=datetime,
+        )
+
+        del self.positions[symbol]
+
+    def _close_position(
+        self,
+        position: Position,
+        exit_price: float,
+        exit_time: datetime,
+    ):
+        profit = (exit_price - position.average_price) * position.quantity
+
+        return_pct = (exit_price - position.average_price) / position.average_price
+
+        trade = Trade(
+            symbol=position.symbol,
+            entry_time=position.entry_time,
+            exit_time=exit_time,
+            entry_price=position.average_price,
+            exit_price=exit_price,
+            quantity=position.quantity,
+            profit=profit,
+            return_pct=return_pct,
+        )
+
+        self.trades.append(trade)
+
+    def buy(
+        self,
+        symbol: str,
+        quantity: int,
+        price: float,
+        datetime: datetime,
+        commission: float = 0.0,
+    ):
+        if quantity <= 0:
+            raise ValueError("Quantity must be positive")
+
+        if price <= 0:
+            raise ValueError("Price must be positive")
+
+        if commission < 0:
+            raise ValueError("Commission cannot be negative")
+
+        total_cost = quantity * price + commission
+
+        if total_cost > self.cash:
+            raise ValueError("Insufficient cash")
+
+        self.cash -= total_cost
+
+        transaction = Transaction(
+            symbol=symbol,
+            datetime=datetime,
+            side=TransactionSide.BUY,
+            quantity=quantity,
+            price=price,
+            commission=commission,
+        )
+
+        self.transactions.append(transaction)
+
+        self._add_position(
+            symbol=symbol,
+            quantity=quantity,
+            price=price,
+        )
 
     def sell(
         self,
         symbol: str,
-        price: float,
         quantity: int,
-        datetime: int,
+        price: float,
+        datetime: datetime,
+        commission: float = 0.0,
     ):
+        if quantity <= 0:
+            raise ValueError("Quantity must be positive")
 
-        position = self.positions[symbol]
+        if price <= 0:
+            raise ValueError("Price must be positive")
+
+        position = self.positions.get(symbol)
+
+        if position is None:
+            raise ValueError(f"No position for {symbol}")
 
         if quantity > position.quantity:
-            raise ValueError("Not enough shares")
+            raise ValueError(f"Not enough shares of {symbol}")
 
-        self.cash += quantity * price
+        proceeds = quantity * price - commission
 
-        position.quantity -= quantity
+        self.cash += proceeds
 
-        if position.quantity == 0:
+        transaction = Transaction(
+            symbol=symbol,
+            datetime=datetime,
+            side=TransactionSide.SELL,
+            quantity=quantity,
+            price=price,
+            commission=commission,
+        )
 
-            # if the position is closed, we can calculate the profit and return percentage
-            # create a trade object and add it to the trades list
-            trade = Trade(
-                symbol=symbol,
-                entry_time=position.entry_time,
-                exit_time=datetime,
-                quantity=position.quantity,
-                entry_price=position.average_price,
-                exit_price=price,
-                profit=(price - position.average_price) * quantity,
-                return_pct=(price - position.average_price)
-                / position.average_price
-                * 100,
-            )
-            self.trades.append(trade)
+        self.transactions.append(transaction)
 
-            del self.positions[symbol]
+        self._remove_position(
+            symbol=symbol,
+            quantity=quantity,
+            price=price,
+            datetime=datetime,
+        )
 
     def get_position(
         self,
@@ -131,12 +219,44 @@ class Portfolio:
 
     def total_value(
         self,
-        prices,
-    ):
+        prices: dict[str, float],
+    ) -> float:
 
         value = self.cash
 
         for symbol, position in self.positions.items():
-            value += prices[symbol] * position.quantity
+
+            if symbol not in prices:
+                raise ValueError(f"Missing price for {symbol}")
+
+            value += position.quantity * prices[symbol]
 
         return value
+
+    def snapshot(
+        self,
+        datetime: datetime,
+        prices: dict[str, float],
+    ) -> PortfolioSnapshot:
+
+        market_value = 0.0
+
+        for symbol, position in self.positions.items():
+
+            if symbol not in prices:
+                raise ValueError(f"Missing price for {symbol}")
+
+            market_value += position.quantity * prices[symbol]
+
+        total_value = self.cash + market_value
+
+        snapshot = PortfolioSnapshot(
+            datetime=datetime,
+            cash=self.cash,
+            market_value=market_value,
+            total_value=total_value,
+        )
+
+        self.snapshots.append(snapshot)
+
+        return snapshot
