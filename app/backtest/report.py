@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from app.backtest.trade import Trade
+from app.domain.trade import Trade
 
 
 @dataclass(slots=True)

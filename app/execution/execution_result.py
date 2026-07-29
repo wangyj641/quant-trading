@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
-from app.backtest.trade import Trade
+from app.portfolio.portfolio import Portfolio
 
 
 @dataclass(slots=True)
 class ExecutionResult:
-    cash: float
-    shares: int
-    trades: list[Trade]
+
+    portfolio: Portfolio
+
+    def __init__(self, portfolio: Portfolio):
+        self.portfolio = portfolio

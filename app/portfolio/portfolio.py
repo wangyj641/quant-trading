@@ -1,13 +1,25 @@
-from app.portfolio.position import Position
+from app.domain.position import Position
+from app.domain.trade import Trade
+from app.domain.transaction import Transaction
+from app.portfolio.snapshot import PortfolioSnapshot
 
 
 class Portfolio:
 
-    def __init__(self, initial_cash: float):
+    def __init__(
+        self,
+        initial_cash: float,
+    ):
 
         self.cash = initial_cash
 
         self.positions: dict[str, Position] = {}
+
+        self.transactions: list[Transaction] = []
+
+        self.trades: list[Trade] = []
+
+        self.snapshots: list[PortfolioSnapshot] = []
 
     @property
     def total_positions(self) -> int:
@@ -18,6 +30,7 @@ class Portfolio:
         symbol: str,
         price: float,
         quantity: int,
+        datetime: int,
     ):
 
         cost = price * quantity
@@ -56,6 +69,7 @@ class Portfolio:
         symbol: str,
         price: float,
         quantity: int,
+        datetime: int,
     ):
 
         position = self.positions[symbol]
@@ -80,3 +94,16 @@ class Portfolio:
     @property
     def invested_value(self):
         return sum(position.cost for position in self.positions.values())
+
+    def snapshot(
+        self,
+        datetime,
+        prices: dict[str, float],
+    ): ...
+
+    def summary(self):
+        return {
+            "cash": self.cash,
+            "invested_value": self.invested_value,
+            "total_value": self.cash + self.invested_value,
+        }
