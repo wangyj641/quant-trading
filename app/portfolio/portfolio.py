@@ -11,6 +11,8 @@ class Portfolio:
         initial_cash: float,
     ):
 
+        self.initial_cash = initial_cash
+
         self.cash = initial_cash
 
         self.positions: dict[str, Position] = {}
@@ -84,6 +86,9 @@ class Portfolio:
         if position.quantity == 0:
             del self.positions[symbol]
 
+        # if the position is closed, we can calculate the profit and return percentage
+        # create a trade object and add it to the trades list
+
     def get_position(
         self,
         symbol: str,
@@ -107,3 +112,15 @@ class Portfolio:
             "invested_value": self.invested_value,
             "total_value": self.cash + self.invested_value,
         }
+
+    def total_value(
+        self,
+        prices,
+    ):
+
+        value = self.cash
+
+        for symbol, position in self.positions.items():
+            value += prices[symbol] * position.quantity
+
+        return value

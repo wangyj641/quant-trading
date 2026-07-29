@@ -10,8 +10,6 @@ class Position:
 
     average_price: float = 0.0
 
-    entry_time: datetime | None = None
-
     @property
     def cost(self) -> float:
         return self.quantity * self.average_price
