@@ -1,6 +1,4 @@
-from app.execution.base import ExecutionResult
 from app.backtest.report import BacktestReport
-from app.domain.trade import Trade
 
 import pandas as pd
 

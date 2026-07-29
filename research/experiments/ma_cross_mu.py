@@ -1,5 +1,4 @@
 from research.runner import ResearchRunner
-from app.backtest.report_formatter import ReportFormatter
 from app.utils.logger import logger
 
 runner = ResearchRunner()
