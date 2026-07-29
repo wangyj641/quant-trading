@@ -1,3 +1,5 @@
+from sqlalchemy.util import symbol
+
 from app.domain.position import Position
 from app.domain.trade import Trade
 from app.domain.transaction import Transaction
@@ -84,10 +86,24 @@ class Portfolio:
         position.quantity -= quantity
 
         if position.quantity == 0:
-            del self.positions[symbol]
 
-        # if the position is closed, we can calculate the profit and return percentage
-        # create a trade object and add it to the trades list
+            # if the position is closed, we can calculate the profit and return percentage
+            # create a trade object and add it to the trades list
+            trade = Trade(
+                symbol=symbol,
+                entry_time=position.entry_time,
+                exit_time=datetime,
+                quantity=position.quantity,
+                entry_price=position.average_price,
+                exit_price=price,
+                profit=(price - position.average_price) * quantity,
+                return_pct=(price - position.average_price)
+                / position.average_price
+                * 100,
+            )
+            self.trades.append(trade)
+
+            del self.positions[symbol]
 
     def get_position(
         self,

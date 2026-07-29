@@ -1,3 +1,6 @@
+from app.backtest import report
+
+
 class ReportFormatter:
 
     @staticmethod
@@ -11,10 +14,17 @@ class ReportFormatter:
 
         print(f"Return       : {report.total_return:.2%}")
 
-        print(f"Trades       : {report.trade_count}")
+        print(f"Trades count : {report.trade_count}")
 
         print(f"Win Rate     : {report.win_rate:.2%}")
 
         print(f"Max DD       : {report.max_drawdown:.2%}")
+
+        print("Trades:")
+        if report.trades:
+            for trade in report.trades:
+                trade.print()
+        else:
+            print("  No trades executed")
 
         print("=" * 40)

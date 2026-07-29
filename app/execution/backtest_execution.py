@@ -1,4 +1,5 @@
 from __future__ import annotations
+from venv import logger
 
 import pandas as pd
 
@@ -38,6 +39,8 @@ class BacktestExecution:
             # BUY
             #
             if signal.signal == SignalType.BUY:
+
+                logger.info(f"Executing BUY signal for {signal.symbol} at {index}")
 
                 quantity = int(portfolio.cash // price)
 

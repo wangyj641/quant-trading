@@ -1,5 +1,6 @@
 from research.runner import ResearchRunner
 from app.utils.logger import logger
+from app.backtest.report_formatter import ReportFormatter
 
 runner = ResearchRunner()
 
@@ -9,6 +10,6 @@ df, signals, report = runner.run(
     slow=20,
 )
 
-logger.info(f"ma cross MU")
+logger.info(f"The report is:")
 
-# ReportFormatter.print(report)
+ReportFormatter.print(report)

@@ -8,6 +8,8 @@ class Position:
 
     quantity: int = 0
 
+    entry_time: datetime = None
+
     average_price: float = 0.0
 
     @property

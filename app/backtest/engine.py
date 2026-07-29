@@ -66,6 +66,7 @@ class BacktestEngine:
         )
 
         max_drawdown = (equity_curve.cummax() - equity_curve).max()
+        trades = execution_result.portfolio.trades
 
         return BacktestReport(
             initial_cash=self.execution_engine.initial_cash,
@@ -74,6 +75,6 @@ class BacktestEngine:
             trade_count=len(execution_result.portfolio.trades),
             win_rate=win_rate,
             max_drawdown=max_drawdown,
-            trades=execution_result.portfolio.trades,
+            trades=trades,
             equity_curve=equity_curve,
         )
