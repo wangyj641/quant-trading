@@ -32,13 +32,12 @@ class ResearchRunner:
 
         signals = strategy.generate(symbol, df)
 
-        execution_engine = BacktestExecution(initial_cash=100000)
-
-        backtest = BacktestEngine(execution_engine)
+        backtest = BacktestEngine(initial_cash=10000)
 
         report = backtest.run(
             df=df,
             signals=signals,
+            symbol=symbol,
         )
 
         return df, signals, report

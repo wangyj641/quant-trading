@@ -10,7 +10,7 @@ from app.execution.backtest_execution import BacktestExecution
 
 def test_backtest():
 
-    execution_engine = BacktestExecution(initial_cash=100000)
+    execution_engine = BacktestExecution(initial_cash=10000)
 
     backtest = BacktestEngine(execution_engine)
 

@@ -14,12 +14,6 @@ class ReportFormatter:
 
         print(f"Return       : {report.total_return:.2%}")
 
-        print(f"Trades count : {report.trade_count}")
-
-        print(f"Win Rate     : {report.win_rate:.2%}")
-
-        print(f"Max DD       : {report.max_drawdown:.2%}")
-
         print("Trades:")
         if report.trades:
             for trade in report.trades:

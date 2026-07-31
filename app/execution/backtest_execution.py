@@ -1,10 +1,12 @@
 from __future__ import annotations
-from venv import logger
 
 import pandas as pd
 
+from app.domain.trading_signal import (
+    TradingSignal,
+    SignalType,
+)
 from app.execution.execution_result import ExecutionResult
-from app.domain.trading_signal import TradingSignal, SignalType
 from app.portfolio.portfolio import Portfolio
 
 
@@ -12,7 +14,7 @@ class BacktestExecution:
 
     def __init__(
         self,
-        initial_cash: float = 100000,
+        initial_cash: float = 10000,
     ):
         self.initial_cash = initial_cash
 
@@ -20,53 +22,100 @@ class BacktestExecution:
         self,
         df: pd.DataFrame,
         signals: list[TradingSignal],
+        symbol: str,
     ) -> ExecutionResult:
 
-        portfolio = Portfolio(self.initial_cash)
+        portfolio = Portfolio(initial_cash=self.initial_cash)
 
         signal_map = {signal.datetime: signal for signal in signals}
 
         for index, row in df.iterrows():
 
-            signal = signal_map.get(index)
-
-            if signal is None:
-                continue
-
             price = float(row["close"])
 
-            #
-            # BUY
-            #
-            if signal.signal == SignalType.BUY:
+            signal = signal_map.get(index)
 
-                logger.info(f"Executing BUY signal for {signal.symbol} at {index}")
+            if signal is not None:
 
-                quantity = int(portfolio.cash // price)
+                self._execute_signal(
+                    portfolio=portfolio,
+                    signal=signal,
+                    price=price,
+                    datetime=index,
+                )
 
-                if quantity > 0:
-
-                    portfolio.buy(
-                        symbol=signal.symbol,
-                        price=price,
-                        quantity=quantity,
-                        datetime=index,
-                    )
-
-            #
-            # SELL
-            #
-            elif signal.signal == SignalType.SELL:
-
-                position = portfolio.get_position(signal.symbol)
-
-                if position is not None and position.quantity > 0:
-
-                    portfolio.sell(
-                        symbol=signal.symbol,
-                        price=price,
-                        quantity=position.quantity,
-                        datetime=index,
-                    )
+            portfolio.snapshot(
+                datetime=index,
+                prices={symbol: price},
+            )
 
         return ExecutionResult(portfolio)
+
+    def _execute_signal(
+        self,
+        portfolio: Portfolio,
+        signal: TradingSignal,
+        price: float,
+        datetime,
+    ) -> None:
+
+        if signal.signal == SignalType.BUY:
+
+            self._buy(
+                portfolio,
+                signal,
+                price,
+                datetime,
+            )
+
+        elif signal.signal == SignalType.SELL:
+
+            self._sell(
+                portfolio,
+                signal,
+                price,
+                datetime,
+            )
+
+    def _buy(
+        self,
+        portfolio: Portfolio,
+        signal: TradingSignal,
+        price: float,
+        datetime,
+    ) -> None:
+
+        quantity = int(portfolio.cash // price)
+
+        if quantity <= 0:
+            return
+
+        portfolio.buy(
+            symbol=signal.symbol,
+            quantity=quantity,
+            price=price,
+            datetime=datetime,
+        )
+
+    def _sell(
+        self,
+        portfolio: Portfolio,
+        signal: TradingSignal,
+        price: float,
+        datetime,
+    ) -> None:
+
+        position = portfolio.get_position(signal.symbol)
+
+        if position is None:
+            return
+
+        if position.quantity <= 0:
+            return
+
+        portfolio.sell(
+            symbol=signal.symbol,
+            quantity=position.quantity,
+            price=price,
+            datetime=datetime,
+        )

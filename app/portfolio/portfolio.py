@@ -204,12 +204,6 @@ class Portfolio:
     def invested_value(self):
         return sum(position.cost for position in self.positions.values())
 
-    def snapshot(
-        self,
-        datetime,
-        prices: dict[str, float],
-    ): ...
-
     def summary(self):
         return {
             "cash": self.cash,

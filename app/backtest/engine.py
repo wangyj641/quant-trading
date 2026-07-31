@@ -1,83 +1,54 @@
-from app.backtest.report import BacktestReport
+from __future__ import annotations
 
 import pandas as pd
+
+from app.backtest.report import BacktestReport
+from app.execution.backtest_execution import BacktestExecution
 
 
 class BacktestEngine:
 
     def __init__(
         self,
-        execution_engine,
+        initial_cash: float = 10000,
     ):
-        self.execution_engine = execution_engine
-
-    def calculate_equity(
-        self,
-        df,
-        execution_result,
-    ):
-
-        equity = []
-
-        for index, row in df.iterrows():
-
-            price = float(row["close"])
-
-            total_value = execution_result.portfolio.cash
-
-            for position in execution_result.portfolio.positions.values():
-
-                total_value += position.quantity * price
-
-            equity.append(
-                {
-                    "datetime": index,
-                    "value": total_value,
-                }
-            )
-
-        return pd.DataFrame(equity).set_index("datetime")["value"]
+        self.initial_cash = initial_cash
 
     def run(
         self,
-        df,
+        df: pd.DataFrame,
         signals,
+        symbol: str,
     ) -> BacktestReport:
 
-        execution_result = self.execution_engine.execute(
+        execution = BacktestExecution(initial_cash=self.initial_cash)
+
+        result = execution.execute(
             df=df,
             signals=signals,
+            symbol=symbol,
         )
 
-        equity_curve = self.calculate_equity(
-            df,
-            execution_result,
-        )
+        portfolio = result.portfolio
 
-        total_return = (
-            equity_curve.iloc[-1] - self.execution_engine.initial_cash
-        ) / self.execution_engine.initial_cash
+        final_equity = self._get_final_equity(portfolio)
 
-        win_rate = (
-            sum(1 for trade in execution_result.portfolio.trades if trade.profit > 0)
-            / len(execution_result.portfolio.trades)
-            if execution_result.portfolio.trades
-            else 0
-        )
-
-        max_drawdown = (
-            equity_curve.cummax() - equity_curve
-        ).max() / equity_curve.cummax().max()
-
-        trades = execution_result.portfolio.trades
+        total_return = (final_equity - self.initial_cash) / self.initial_cash
 
         return BacktestReport(
-            initial_cash=self.execution_engine.initial_cash,
-            final_cash=execution_result.portfolio.cash,
+            initial_cash=self.initial_cash,
+            final_cash=portfolio.cash,
+            final_equity=final_equity,
             total_return=total_return,
-            trade_count=len(trades),
-            win_rate=win_rate,
-            max_drawdown=max_drawdown,
-            trades=trades,
-            equity_curve=equity_curve,
+            trades=portfolio.trades,
         )
+
+    def _get_final_equity(
+        self,
+        portfolio,
+    ) -> float:
+
+        if not portfolio.snapshots:
+            return portfolio.initial_cash
+
+        return portfolio.snapshots[-1].total_value
