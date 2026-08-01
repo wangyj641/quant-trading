@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app.backtest.equity_curve import EquityCurve
 from app.domain.trade import Trade
 
 
@@ -14,4 +15,14 @@ class BacktestReport:
 
     total_return: float
 
+    max_drawdown: float
+
+    volatility: float
+
+    sharpe_ratio: float
+
+    cagr: float
+
     trades: list[Trade]
+
+    equity_curve: EquityCurve

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from app.backtest.engine import BacktestEngine
-from app.backtest.metrics import Metrics
+from app.backtest.metrics import BacktestMetrics
 from app.domain.signal import SignalType
 from app.execution.backtest_execution import BacktestExecution
 from app.execution.base import ExecutionResult
