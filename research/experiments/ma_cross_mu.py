@@ -4,7 +4,7 @@ from app.backtest.report_formatter import ReportFormatter
 
 runner = ResearchRunner()
 
-df, signals, report = runner.run(
+df, report = runner.run(
     symbol="MU",
     fast=5,
     slow=20,

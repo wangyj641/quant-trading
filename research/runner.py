@@ -28,16 +28,18 @@ class ResearchRunner:
 
         df = indicator.calculate(df)
 
-        strategy = MACrossStrategy()
+        strategy = MACrossStrategy(
+            short_window=5,
+            long_window=20,
+        )
 
-        signals = strategy.generate(symbol, df)
+        # signals = strategy.generate(symbol, df)
 
-        backtest = BacktestEngine(initial_cash=10000)
+        backtest = BacktestEngine(strategy=strategy, initial_cash=10_000)
 
         report = backtest.run(
             df=df,
-            signals=signals,
             symbol=symbol,
         )
 
-        return df, signals, report
+        return df, report

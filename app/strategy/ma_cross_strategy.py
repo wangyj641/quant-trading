@@ -1,43 +1,73 @@
 import pandas as pd
 
-from app.domain.signal import SignalType
+from app.domain.trading_signal import (
+    TradingSignal,
+    SignalType,
+)
 from app.strategy.base_strategy import Strategy
-
-from app.domain.trading_signal import TradingSignal
-from app.domain.trading_signal import SignalType
 
 
 class MACrossStrategy(Strategy):
 
-    def generate(
+    def __init__(
         self,
-        symbol: str,
+        short_window: int = 20,
+        long_window: int = 50,
+    ):
+        if short_window >= long_window:
+            raise ValueError("short_window must be smaller " "than long_window")
+
+        self.short_window = short_window
+        self.long_window = long_window
+
+    def generate_signals(
+        self,
         df: pd.DataFrame,
+        symbol: str,
     ) -> list[TradingSignal]:
+
+        data = df.copy()
+
+        data["short_ma"] = data["close"].rolling(self.short_window).mean()
+
+        data["long_ma"] = data["close"].rolling(self.long_window).mean()
 
         signals = []
 
-        for i in range(1, len(df)):
+        previous_short = None
+        previous_long = None
 
-            prev = df.iloc[i - 1]
-            curr = df.iloc[i]
+        for index, row in data.iterrows():
 
-            if prev["MA5"] <= prev["MA20"] and curr["MA5"] > curr["MA20"]:
-                signals.append(
-                    TradingSignal(
-                        symbol=symbol,
-                        datetime=df.index[i],
-                        signal=SignalType.BUY,
+            short_ma = row["short_ma"]
+            long_ma = row["long_ma"]
+
+            if pd.isna(short_ma) or pd.isna(long_ma):
+                continue
+
+            if previous_short is not None and previous_long is not None:
+
+                # Golden Cross
+                if previous_short <= previous_long and short_ma > long_ma:
+                    signals.append(
+                        TradingSignal(
+                            symbol=symbol,
+                            datetime=index,
+                            signal=SignalType.BUY,
+                        )
                     )
-                )
 
-            elif prev["MA5"] >= prev["MA20"] and curr["MA5"] < curr["MA20"]:
-                signals.append(
-                    TradingSignal(
-                        symbol=symbol,
-                        datetime=df.index[i],
-                        signal=SignalType.SELL,
+                # Death Cross
+                elif previous_short >= previous_long and short_ma < long_ma:
+                    signals.append(
+                        TradingSignal(
+                            symbol=symbol,
+                            datetime=index,
+                            signal=SignalType.SELL,
+                        )
                     )
-                )
+
+            previous_short = short_ma
+            previous_long = long_ma
 
         return signals

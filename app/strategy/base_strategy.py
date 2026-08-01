@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 import pandas as pd
 
 from app.domain.trading_signal import TradingSignal
@@ -7,8 +8,9 @@ from app.domain.trading_signal import TradingSignal
 class Strategy(ABC):
 
     @abstractmethod
-    def generate(
+    def generate_signals(
         self,
-        symbol: str,
         df: pd.DataFrame,
-    ) -> list[TradingSignal]: ...
+        symbol: str,
+    ) -> list[TradingSignal]:
+        pass
