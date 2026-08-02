@@ -1,13 +1,14 @@
 from app.database.db import SessionLocal
 from app.database.models import Price
 from app.database.orm_mapper import ORMMapper
+from app.domain.market_bar import MarketBar
+from app.domain.timeframe import TimeFrame
+from datetime import datetime
 
 from sqlalchemy import select
+import pandas as pd
 
-
-from app.domain.market_bar import MarketBar
-
-from app.domain.timeframe import TimeFrame
+from sqlalchemy import text
 
 
 class PriceRepository:
@@ -56,23 +57,79 @@ class PriceRepository:
 
     def get_history(
         self,
-        symbol,
-        timeFrame=TimeFrame.DAY_1,
-        limit: int | None = None,
-    ) -> list[MarketBar]:
+        symbol: str,
+        timeframe: TimeFrame,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> pd.DataFrame:
 
-        stmt = (
-            select(Price)
-            .where(
-                Price.symbol == symbol,
-                Price.interval == timeFrame.value,
-            )
-            .order_by(Price.datetime.asc())
+        sql = """
+            SELECT
+                datetime,
+                open,
+                high,
+                low,
+                close,
+                volume
+            FROM prices
+            WHERE symbol = :symbol
+              AND interval = :interval
+        """
+
+        params = {
+            "symbol": symbol,
+            "interval": timeframe.value,
+        }
+
+        if start is not None:
+            sql += """
+                AND datetime >= :start
+            """
+            params["start"] = start
+
+        if end is not None:
+            sql += """
+                AND datetime <= :end
+            """
+            params["end"] = end
+
+        sql += """
+            ORDER BY datetime ASC
+        """
+
+        result = self.session.execute(
+            text(sql),
+            params,
         )
 
-        if limit:
-            stmt = stmt.limit(limit)
+        rows = result.fetchall()
 
-        prices = self.session.scalars(stmt).all()
+        df = pd.DataFrame(
+            rows,
+            columns=result.keys(),
+        )
 
-        return [ORMMapper.to_market_bar(price) for price in prices]
+        if df.empty:
+            return df
+
+        df["datetime"] = pd.to_datetime(df["datetime"])
+
+        numeric_columns = [
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+        ]
+
+        for column in numeric_columns:
+            df[column] = pd.to_numeric(
+                df[column],
+                errors="coerce",
+            )
+
+        df = df.set_index("datetime")
+
+        df = df.sort_index()
+
+        return df

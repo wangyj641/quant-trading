@@ -7,29 +7,43 @@ class Trade:
 
     symbol: str
 
-    entry_time: datetime
-
-    exit_time: datetime
-
+    entry_datetime: datetime
     entry_price: float
+    quantity: float
 
-    exit_price: float
+    exit_datetime: datetime | None = None
+    exit_price: float | None = None
 
-    quantity: int
+    pnl: float | None = None
+    return_pct: float | None = None
 
-    profit: float
+    @property
+    def is_closed(self) -> bool:
+        return self.exit_datetime is not None
 
-    return_pct: float
+    @property
+    def is_winner(self) -> bool:
+        return self.is_closed and self.pnl is not None and self.pnl > 0
 
-    def print(self):
+    @property
+    def is_loser(self) -> bool:
+        return self.is_closed and self.pnl is not None and self.pnl < 0
 
-        print("=" * 40)
+    def close(
+        self,
+        datetime: datetime,
+        price: float,
+    ) -> None:
 
-        print(f"symbol        : {self.symbol}")
-        print(f"entry_time    : {self.entry_time}")
-        print(f"exit_time     : {self.exit_time}")
-        print(f"quantity      : {self.quantity}")
-        print(f"entry_price   : {self.entry_price:,.2f}")
-        print(f"exit_price    : {self.exit_price:,.2f}")
-        print(f"profit        : {self.profit:,.2f}")
-        print(f"return_pct    : {self.return_pct:.2%}")
+        if self.is_closed:
+            raise ValueError("Trade is already closed")
+
+        self.exit_datetime = datetime
+        self.exit_price = price
+
+        self.pnl = (price - self.entry_price) * self.quantity
+
+        if self.entry_price != 0:
+            self.return_pct = (price - self.entry_price) / self.entry_price
+        else:
+            self.return_pct = 0.0

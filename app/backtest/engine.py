@@ -57,11 +57,13 @@ class BacktestEngine:
 
         sharpe_ratio = BacktestMetrics.sharpe_ratio(equity_curve.values)
 
-        cagr = BacktestMetrics.cagr(
-            initial_value=self.initial_cash,
-            final_value=equity_curve.final_value,
-            years=len(equity_curve.values),
-        )
+        gross_profit = BacktestMetrics.gross_profit(portfolio.trades)
+
+        gross_loss = BacktestMetrics.gross_loss(portfolio.trades)
+
+        win_rate = BacktestMetrics.win_rate(portfolio.trades)
+
+        profit_factor = BacktestMetrics.profit_factor(portfolio.trades)
 
         return BacktestReport(
             initial_cash=self.initial_cash,
@@ -71,8 +73,12 @@ class BacktestEngine:
             max_drawdown=max_drawdown,
             volatility=volatility,
             sharpe_ratio=sharpe_ratio,
-            cagr=cagr,
+            gross_profit=gross_profit,
+            gross_loss=gross_loss,
+            win_rate=win_rate,
+            profit_factor=profit_factor,
             trades=portfolio.trades,
+            open_trades=list(portfolio.open_trades.values()),
             equity_curve=equity_curve,
         )
 

@@ -19,3 +19,16 @@ class Position:
     @property
     def is_empty(self) -> bool:
         return self.quantity == 0
+
+    def buy(self, quantity: int, price: float):
+        old_quantity = self.quantity
+
+        old_cost = old_quantity * self.average_price
+
+        new_cost = quantity * price
+
+        total_quantity = old_quantity + quantity
+
+        self.average_price = (old_cost + new_cost) / total_quantity
+
+        self.quantity = total_quantity

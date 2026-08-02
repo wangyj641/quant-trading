@@ -1,45 +1,44 @@
-from app.database.repository import PriceRepository
-from app.indicators.indicator_engine import IndicatorEngine
-from app.strategy.ma_cross_strategy import MACrossStrategy
 from app.backtest.engine import BacktestEngine
-from app.converters.dataframe_converter import DataFrameConverter
-from app.execution.backtest_execution import BacktestExecution
+from app.database.repository import PriceRepository
+from app.strategy.base_strategy import Strategy
+from app.domain.timeframe import TimeFrame
 
 
 class ResearchRunner:
 
+    def __init__(
+        self,
+        repository: PriceRepository,
+    ):
+        self.repository = repository
+
     def run(
         self,
         symbol: str,
-        fast: int = 5,
-        slow: int = 20,
+        strategy: Strategy,
+        timeframe: TimeFrame = TimeFrame.DAY_1,
+        initial_cash: float = 100_000,
     ):
 
-        repo = PriceRepository()
-
-        bars = repo.get_history(symbol)
-
-        df = DataFrameConverter.bars_to_dataframe(bars)
-
-        indicator = IndicatorEngine()
-
-        indicator.add_ma(df, fast)
-        indicator.add_ma(df, slow)
-
-        df = indicator.calculate(df)
-
-        strategy = MACrossStrategy(
-            short_window=5,
-            long_window=20,
+        # 1. Load historical data
+        df = self.repository.get_history(
+            symbol=symbol,
+            timeframe=timeframe,
         )
 
-        # signals = strategy.generate(symbol, df)
+        if df.empty:
+            raise ValueError(f"No historical data found for {symbol}")
 
-        backtest = BacktestEngine(strategy=strategy, initial_cash=10_000)
+        # 2. Create backtest engine
+        engine = BacktestEngine(
+            strategy=strategy,
+            initial_cash=initial_cash,
+        )
 
-        report = backtest.run(
+        # 3. Run backtest
+        report = engine.run(
             df=df,
             symbol=symbol,
         )
 
-        return df, report
+        return report

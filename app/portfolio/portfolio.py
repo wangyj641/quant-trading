@@ -27,6 +27,8 @@ class Portfolio:
 
         self.snapshots: list[PortfolioSnapshot] = []
 
+        self.open_trades: dict[str, Trade] = {}
+
     @property
     def total_positions(self) -> int:
         return len(self.positions)
@@ -47,20 +49,9 @@ class Portfolio:
                 average_price=price,
                 entry_time=datetime.now(),
             )
-
             return
 
-        old_quantity = position.quantity
-
-        old_cost = old_quantity * position.average_price
-
-        new_cost = quantity * price
-
-        total_quantity = old_quantity + quantity
-
-        position.average_price = (old_cost + new_cost) / total_quantity
-
-        position.quantity = total_quantity
+        position.buy(quantity, price)
 
     def _remove_position(
         self,
@@ -97,12 +88,12 @@ class Portfolio:
 
         trade = Trade(
             symbol=position.symbol,
-            entry_time=position.entry_time,
-            exit_time=exit_time,
+            entry_datetime=position.entry_time,
+            exit_datetime=exit_time,
             entry_price=position.average_price,
             exit_price=exit_price,
             quantity=position.quantity,
-            profit=profit,
+            pnl=profit,
             return_pct=return_pct,
         )
 

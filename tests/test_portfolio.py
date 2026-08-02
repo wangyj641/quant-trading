@@ -75,7 +75,7 @@ def test_sell():
     assert trade.entry_price == 120
     assert trade.exit_price == 130
     assert trade.quantity == 10
-    assert trade.profit == 100
+    assert trade.pnl == 100
 
 
 def test_partial_sell():

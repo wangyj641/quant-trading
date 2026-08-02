@@ -1,5 +1,7 @@
 import math
 
+from app.domain.trade import Trade
+
 
 class BacktestMetrics:
 
@@ -23,18 +25,21 @@ class BacktestMetrics:
             return 0.0
 
         peak = equity_values[0]
-
         max_drawdown = 0.0
 
         for equity in equity_values:
 
-            if equity > peak:
-                peak = equity
+            peak = max(
+                peak,
+                equity,
+            )
 
             drawdown = (equity - peak) / peak
 
-            if drawdown < max_drawdown:
-                max_drawdown = drawdown
+            max_drawdown = min(
+                max_drawdown,
+                drawdown,
+            )
 
         return max_drawdown
 
@@ -66,9 +71,7 @@ class BacktestMetrics:
 
         variance = sum((r - mean) ** 2 for r in returns) / (len(returns) - 1)
 
-        std = math.sqrt(variance)
-
-        return std * math.sqrt(periods_per_year)
+        return math.sqrt(variance) * math.sqrt(periods_per_year)
 
     @staticmethod
     def sharpe_ratio(
@@ -113,19 +116,45 @@ class BacktestMetrics:
         return (mean / std) * math.sqrt(periods_per_year)
 
     @staticmethod
-    def cagr(
-        initial_value: float,
-        final_value: float,
-        years: float,
+    def gross_profit(
+        trades: list[Trade],
     ) -> float:
 
-        if initial_value <= 0:
+        return sum(trade.pnl for trade in trades if trade.is_winner)
+
+    @staticmethod
+    def gross_loss(
+        trades: list[Trade],
+    ) -> float:
+
+        return sum(-trade.pnl for trade in trades if trade.is_loser)
+
+    @staticmethod
+    def win_rate(
+        trades: list[Trade],
+    ) -> float:
+
+        if not trades:
             return 0.0
 
-        if final_value <= 0:
+        winners = sum(1 for trade in trades if trade.is_winner)
+
+        return winners / len(trades)
+
+    @staticmethod
+    def profit_factor(
+        trades: list[Trade],
+    ) -> float:
+
+        gross_profit = BacktestMetrics.gross_profit(trades)
+
+        gross_loss = BacktestMetrics.gross_loss(trades)
+
+        if gross_loss == 0:
+
+            if gross_profit > 0:
+                return float("inf")
+
             return 0.0
 
-        if years <= 0:
-            return 0.0
-
-        return (final_value / initial_value) ** (1 / years) - 1
+        return gross_profit / gross_loss
