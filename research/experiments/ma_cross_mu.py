@@ -3,25 +3,40 @@ from app.strategy.ma_cross_strategy import MACrossStrategy
 from app.domain.timeframe import TimeFrame
 
 from research.runner import ResearchRunner
+from research.benchmark import BuyAndHoldBenchmark
+
+import pandas as pd
 
 
 def main():
 
     repository = PriceRepository()
 
+    runner = ResearchRunner(
+        repository=repository,
+    )
+
+    df = runner.load_data(
+        symbol="MU",
+        timeframe=TimeFrame.DAY_1,
+    )
+
     strategy = MACrossStrategy(
         short_window=20,
         long_window=50,
-    )
-
-    runner = ResearchRunner(
-        repository=repository,
     )
 
     report = runner.run(
         symbol="MU",
         strategy=strategy,
         timeframe=TimeFrame.DAY_1,
+        initial_cash=100_000,
+    )
+
+    benchmark = BuyAndHoldBenchmark()
+
+    benchmark_result = benchmark.run(
+        df=df,
         initial_cash=100_000,
     )
 
@@ -63,6 +78,23 @@ def main():
         print(f"Trade {i}: {trade}")
 
     print("=" * 60)
+
+    print()
+
+    print("=" * 70)
+    print("Strategy vs Buy & Hold")
+    print("=" * 70)
+
+    print(f"Strategy Return : " f"{report.total_return:.2%}")
+
+    print(f"Buy & Hold      : " f"{benchmark_result.total_return:.2%}")
+
+    print(
+        f"Difference      : "
+        f"{report.total_return - benchmark_result.total_return:.2%}"
+    )
+
+    print("=" * 70)
 
 
 if __name__ == "__main__":
