@@ -5,6 +5,7 @@ from app.database.repository import PriceRepository
 from app.services.market_data_service import MarketDataService
 from app.database.models import Base
 from app.database.db import engine
+from app.constants.common import SYMBOL
 
 
 from pathlib import Path
@@ -36,7 +37,7 @@ def main():
 
     service = MarketDataService(downloader, repo)
 
-    service.sync_symbol("MU")
+    service.sync_symbol(SYMBOL)
 
     repo.close()
 

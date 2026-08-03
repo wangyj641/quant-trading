@@ -5,6 +5,8 @@ from app.domain.timeframe import TimeFrame
 from research.runner import ResearchRunner
 from research.benchmark import BuyAndHoldBenchmark
 
+from app.constants.common import INITIAL_CASH, SYMBOL
+
 import pandas as pd
 
 
@@ -17,7 +19,7 @@ def main():
     )
 
     df = runner.load_data(
-        symbol="MU",
+        symbol=SYMBOL,
         timeframe=TimeFrame.DAY_1,
     )
 
@@ -27,17 +29,17 @@ def main():
     )
 
     report = runner.run(
-        symbol="MU",
+        symbol=SYMBOL,
         strategy=strategy,
         timeframe=TimeFrame.DAY_1,
-        initial_cash=100_000,
+        initial_cash=INITIAL_CASH,
     )
 
     benchmark = BuyAndHoldBenchmark()
 
     benchmark_result = benchmark.run(
         df=df,
-        initial_cash=100_000,
+        initial_cash=INITIAL_CASH,
     )
 
     print()
@@ -45,7 +47,7 @@ def main():
     print("Backtest Report")
     print("=" * 60)
 
-    print("Symbol          : MU")
+    print(f"Symbol          : {SYMBOL}")
     print(f"Initial Cash    : " f"${report.initial_cash:,.2f}")
 
     print(f"Final Cash      : " f"${report.final_cash:,.2f}")

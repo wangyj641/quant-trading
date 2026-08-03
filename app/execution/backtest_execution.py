@@ -8,6 +8,7 @@ from app.domain.trading_signal import (
 )
 from app.execution.execution_result import ExecutionResult
 from app.portfolio.portfolio import Portfolio
+from app.constants.common import COMMISSION_RATE
 
 
 class BacktestExecution:
@@ -95,6 +96,7 @@ class BacktestExecution:
             quantity=quantity,
             price=price,
             datetime=datetime,
+            commission=COMMISSION_RATE,
         )
 
     def _sell(
@@ -118,4 +120,5 @@ class BacktestExecution:
             quantity=position.quantity,
             price=price,
             datetime=datetime,
+            commission=COMMISSION_RATE,
         )
