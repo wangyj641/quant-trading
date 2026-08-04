@@ -7,6 +7,11 @@ from research.benchmark import BuyAndHoldBenchmark
 
 from app.constants.common import INITIAL_CASH, SYMBOL
 
+from research.plot import (
+    plot_price,
+    plot_equity_curve,
+)
+
 import pandas as pd
 
 
@@ -97,6 +102,28 @@ def main():
     )
 
     print("=" * 70)
+
+    print(f"Data rows           : {len(df)}")
+
+    print(f"Equity curve points : " f"{len(report.equity_curve.points)}")
+
+    print(report.equity_curve.points[0])
+
+    print(report.equity_curve.points[-1])
+
+    print("=" * 70)
+
+    plot_price(
+        df=df,
+        short_window=20,
+        long_window=50,
+        trades=report.trades,
+    )
+
+    plot_equity_curve(
+        report=report,
+        benchmark_result=benchmark_result,
+    )
 
 
 if __name__ == "__main__":

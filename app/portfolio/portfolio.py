@@ -6,6 +6,7 @@ from app.domain.transaction import Transaction
 from app.portfolio.snapshot import PortfolioSnapshot
 from datetime import datetime
 from app.domain.transaction import TransactionSide
+from app.utils.logger import logger
 
 
 class Portfolio:
@@ -202,36 +203,25 @@ class Portfolio:
             "total_value": self.cash + self.invested_value,
         }
 
-    def total_value(
-        self,
-        prices: dict[str, float],
-    ) -> float:
+    @property
+    def total_value(self) -> float:
 
-        value = self.cash
+        market_value = sum(
+            position.market_value for position in self.positions.values()
+        )
 
-        for symbol, position in self.positions.items():
-
-            if symbol not in prices:
-                raise ValueError(f"Missing price for {symbol}")
-
-            value += position.quantity * prices[symbol]
-
-        return value
+        return self.cash + market_value
 
     def snapshot(
         self,
-        datetime: datetime,
-        prices: dict[str, float],
+        datetime,
     ) -> PortfolioSnapshot:
 
-        market_value = 0.0
-
-        for symbol, position in self.positions.items():
-
-            if symbol not in prices:
-                raise ValueError(f"Missing price for {symbol}")
-
-            market_value += position.quantity * prices[symbol]
+        market_value = sum(
+            position.market_value
+            for position in self.positions.values()
+            if position.quantity != 0
+        )
 
         total_value = self.cash + market_value
 
@@ -245,3 +235,35 @@ class Portfolio:
         self.snapshots.append(snapshot)
 
         return snapshot
+
+    def mark_to_market(
+        self,
+        prices: dict[str, float],
+    ) -> float:
+        """
+        Update market prices and return total portfolio equity.
+
+        prices:
+            {
+                "MU": 123.45,
+                "NVDA": 180.20,
+            }
+        """
+
+        market_value = 0.0
+
+        for symbol, position in self.positions.items():
+
+            if position.quantity == 0:
+                continue
+
+            if symbol not in prices:
+                continue
+
+            price = prices[symbol]
+
+            position.market_price = price
+
+            market_value += position.quantity * price
+
+        return self.cash + market_value

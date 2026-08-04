@@ -9,6 +9,8 @@ from app.domain.trading_signal import (
 from app.execution.execution_result import ExecutionResult
 from app.portfolio.portfolio import Portfolio
 from app.constants.common import COMMISSION_RATE
+from app.backtest.equity_curve import EquityCurve
+from app.utils.logger import logger
 
 
 class BacktestExecution:
@@ -28,11 +30,13 @@ class BacktestExecution:
 
         portfolio = Portfolio(initial_cash=self.initial_cash)
 
+        equity_curve = EquityCurve()
+
         signal_map = {signal.datetime: signal for signal in signals}
 
         for index, row in df.iterrows():
 
-            price = float(row["close"])
+            current_price = float(row["close"])
 
             signal = signal_map.get(index)
 
@@ -41,14 +45,15 @@ class BacktestExecution:
                 self._execute_signal(
                     portfolio=portfolio,
                     signal=signal,
-                    price=price,
+                    price=current_price,
                     datetime=index,
                 )
 
-            portfolio.snapshot(
-                datetime=index,
-                prices={symbol: price},
-            )
+            portfolio.mark_to_market(prices={symbol: current_price})
+
+            snapshot = portfolio.snapshot(datetime=index)
+
+            equity_curve.add(index, snapshot.total_value)
 
         return ExecutionResult(portfolio)
 

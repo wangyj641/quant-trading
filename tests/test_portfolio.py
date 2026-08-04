@@ -104,24 +104,48 @@ def test_partial_sell():
     assert len(portfolio.trades) == 0
 
 
-def test_snapshot():
+def test_mark_to_market():
 
-    portfolio = Portfolio(10000)
+    portfolio = Portfolio(initial_cash=100_000)
 
     portfolio.buy(
-        "MU",
-        10,
-        120,
-        datetime(2026, 1, 1),
+        symbol="MU",
+        datetime=datetime(2026, 1, 1),
+        price=100,
+        quantity=100,
     )
 
-    snapshot = portfolio.snapshot(
-        datetime(2026, 1, 2),
-        {
-            "MU": 130,
-        },
+    equity = portfolio.mark_to_market(prices={"MU": 120})
+
+    assert equity == 102_000
+
+
+def test_daily_equity_curve():
+
+    portfolio = Portfolio(initial_cash=100_000)
+
+    equity_values = []
+
+    portfolio.buy(
+        symbol="MU",
+        datetime=datetime(2026, 1, 1),
+        price=100,
+        quantity=100,
     )
 
-    assert snapshot.cash == 8800
-    assert snapshot.market_value == 1300
-    assert snapshot.total_value == 10100
+    prices = [100, 110, 120, 90]
+
+    for price in prices:
+
+        equity = portfolio.mark_to_market(prices={"MU": price})
+
+        equity_values.append(equity)
+
+    assert len(equity_values) == 4
+
+    assert equity_values == [
+        100_000,
+        101_000,
+        102_000,
+        99_000,
+    ]

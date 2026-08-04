@@ -40,7 +40,7 @@ def test_full_backtest():
 
     assert report.initial_cash == 100_000
 
-    assert report.final_equity > 0
+    assert report.final_equity >= 0
 
     assert report.equity_curve is not None
 

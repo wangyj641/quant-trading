@@ -12,6 +12,18 @@ class Position:
 
     average_price: float = 0.0
 
+    market_price: float = 0.0
+
+    @property
+    def market_value(self) -> float:
+
+        return self.quantity * self.market_price
+
+    @property
+    def unrealized_pnl(self) -> float:
+
+        return self.quantity * (self.market_price - self.average_price)
+
     @property
     def cost(self) -> float:
         return self.quantity * self.average_price
